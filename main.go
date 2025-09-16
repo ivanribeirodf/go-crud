@@ -19,6 +19,7 @@ func main() {
     r := gin.Default()
 
 	r.Use(middlewares.ValidationErrorHandler)
+	r.Use(middlewares.LoggerMiddleware())
 
     database.ConnectDB()
     database.DB.AutoMigrate(&models.User{})
