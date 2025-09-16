@@ -1,20 +1,26 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
+    "net/http"
     "go-crud/database"
     "go-crud/models"
-    "net/http"
+    "go-crud/dto"
+
+    "github.com/gin-gonic/gin"
 )
 
 func CreateUser(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	database.DB.Create(&user)
-	c.JSON(http.StatusOK, user)
+    var input dto.CreateUserDTO
+    if err := c.ShouldBindJSON(&input); err != nil {
+        // c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(err)
+        return
+    }
+
+    user := models.User{Name: input.Name, Email: input.Email}
+    database.DB.Create(&user)
+
+    c.JSON(http.StatusCreated, gin.H{"data": user})
 }
 
 func GetUsers(c *gin.Context) {
@@ -35,22 +41,20 @@ func GetUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-    var user models.User
-    id := c.Param("id")
-
-    if err := database.DB.First(&user, id).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
-        return
-    }
-
-    var input models.User
+    var input dto.UpdateUserDTO
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    database.DB.Model(&user).Updates(input)
-    c.JSON(http.StatusOK, user)
+    var user models.User
+    if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
+        return
+    }
+
+    database.DB.Model(&user).Updates(models.User{Name: input.Name, Email: input.Email})
+    c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 func DeleteUser(c *gin.Context) {

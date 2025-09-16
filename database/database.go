@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
     "os"
-	
+
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
 )
@@ -11,6 +11,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() {
+
     host := os.Getenv("DB_HOST")
     user := os.Getenv("DB_USER")
     password := os.Getenv("DB_PASSWORD")
@@ -21,8 +22,10 @@ func ConnectDB() {
         host, user, password, dbname, port)
 
     database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        panic("❌ Falha ao conectar ao banco")
+    
+	if err != nil {
+        panic("Falha ao conectar ao banco")		
     }
+
     DB = database
 }
