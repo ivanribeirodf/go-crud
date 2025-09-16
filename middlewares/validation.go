@@ -9,12 +9,12 @@ import (
 )
 
 func ValidationErrorHandler(c *gin.Context) {
-    c.Next() // executa a request e coleta os erros depois
+    c.Next() 
 
     if len(c.Errors) > 0 {
         var errors []string
         for _, e := range c.Errors {
-            // Se for erro de validação
+			
             if ve, ok := e.Err.(validator.ValidationErrors); ok {
                 for _, fe := range ve {
                     field := fe.Field()

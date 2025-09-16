@@ -11,7 +11,7 @@ func LoggerMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
         start := time.Now()
 
-        c.Next() // processa a request
+        c.Next()
 
         duration := time.Since(start)
         log.Printf("[%s] %s %s %d %s",
