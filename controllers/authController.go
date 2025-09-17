@@ -14,9 +14,8 @@ import (
 	"go-crud/models"
 )
 
-var jwtKey = []byte(os.Getenv("SECRET_KEY")) // ⚠️ colocar no .env depois
+var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
-// Registro
 func Register(c *gin.Context) {
 	var input dto.CreateUserDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -32,7 +31,6 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Usuário registrado com sucesso"})
 }
 
-// Login
 func Login(c *gin.Context) {
 	var input dto.LoginDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
