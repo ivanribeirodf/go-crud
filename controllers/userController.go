@@ -1,68 +1,89 @@
 package controllers
 
 import (
-    "net/http"
-    "go-crud/database"
-    "go-crud/models"
-    "go-crud/dto"
+	"go-crud/database"
+	"go-crud/dto"
+	"go-crud/models"
+	"net/http"
 
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func CreateUser(c *gin.Context) {
-    var input dto.CreateUserDTO
-    if err := c.ShouldBindJSON(&input); err != nil {
-        // c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var input dto.CreateUserDTO
+	if err := c.ShouldBindJSON(&input); err != nil {
+		// c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		c.Error(err)
-        return
-    }
+		return
+	}
 
-    user := models.User{Name: input.Name, Email: input.Email}
-    database.DB.Create(&user)
+	user := models.User{Name: input.Name, Email: input.Email}
+	database.DB.Create(&user)
 
-    c.JSON(http.StatusCreated, gin.H{"data": user})
+	c.JSON(http.StatusCreated, gin.H{"data": user})
 }
 
 func GetUsers(c *gin.Context) {
-    var users []models.User
-    database.DB.Find(&users)
-    c.JSON(http.StatusOK, users)
+	var users []models.User
+	database.DB.Find(&users)
+	c.JSON(http.StatusOK, users)
 }
 
 func GetUser(c *gin.Context) {
-    var user models.User
-    id := c.Param("id")
-    result := database.DB.First(&user, id)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
-        return
-    }
-    c.JSON(http.StatusOK, user)
+	var user models.User
+	id := c.Param("id")
+	result := database.DB.First(&user, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
 func UpdateUser(c *gin.Context) {
-    var input dto.UpdateUserDTO
-    if err := c.ShouldBindJSON(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	var input dto.UpdateUserDTO
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    var user models.User
-    if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
-        return
-    }
+	var user models.User
+	if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
+		return
+	}
 
-    database.DB.Model(&user).Updates(models.User{Name: input.Name, Email: input.Email})
-    c.JSON(http.StatusOK, gin.H{"data": user})
+	database.DB.Model(&user).Updates(models.User{Name: input.Name, Email: input.Email})
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 func DeleteUser(c *gin.Context) {
-    var user models.User
-    id := c.Param("id")
-    if err := database.DB.Delete(&user, id).Error; err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Erro ao deletar"})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"message": "Usuário deletado"})
+	var user models.User
+	id := c.Param("id")
+	if err := database.DB.Delete(&user, id).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Erro ao deletar"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Usuário deletado"})
+}
+
+func GetProfile(c *gin.Context) {
+	tokenValue, exists := c.Get("token")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token não encontrado"})
+		return
+	}
+
+	token := tokenValue.(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+
+	userID := uint(claims["user_id"].(float64))
+	role := claims["role"].(string)
+
+	c.JSON(200, gin.H{
+		"message": "Perfil do usuário",
+		"user_id": userID,
+		"role":    role,
+	})
 }

@@ -4,6 +4,7 @@ type CreateUserDTO struct {
 	Name   string `json:"name" binding:"required,min=3"`
 	Email  string `json:"email" binding:"required,email"`
 	Passwd string `json:"password" binding:"required,min=6"`
+	Role   string `json:"role"`
 }
 
 type LoginDTO struct {

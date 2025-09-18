@@ -24,8 +24,16 @@ func Register(c *gin.Context) {
 	}
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(input.Passwd), bcrypt.DefaultCost)
-
-	user := models.User{Name: input.Name, Email: input.Email, Passwd: string(hashedPassword)}
+	role := "user"
+	if input.Role != "" {
+		role = input.Role
+	}
+	user := models.User{
+		Name:   input.Name,
+		Email:  input.Email,
+		Passwd: string(hashedPassword),
+		Role:   role,
+	}
 	database.DB.Create(&user)
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Usuário registrado com sucesso"})
@@ -51,6 +59,7 @@ func Login(c *gin.Context) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 

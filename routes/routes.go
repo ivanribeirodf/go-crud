@@ -18,6 +18,6 @@ func SetupRoutes(r *gin.Engine) {
 		protected.GET("/users", controllers.GetUsers)
 		protected.GET("/users/:id", controllers.GetUser)
 		protected.PUT("/users/:id", controllers.UpdateUser)
-		protected.DELETE("/users/:id", controllers.DeleteUser)
+		protected.DELETE("/users/:id", middlewares.RequireRole("admin"), controllers.DeleteUser)
 	}
 }
