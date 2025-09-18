@@ -24,6 +24,17 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": user})
 }
 
+// GetUsers godoc
+// @Summary Lista usuários
+// @Description Retorna todos os usuários com paginação
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param page query int false "Número da página"
+// @Param limit query int false "Quantidade por página"
+// @Success 200 {array} models.User
+// @Security BearerAuth
+// @Router /users [get]
 func GetUsers(c *gin.Context) {
 	var users []models.User
 	database.DB.Find(&users)
